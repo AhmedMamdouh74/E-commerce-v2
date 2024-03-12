@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+
 }
 
 android {
@@ -47,4 +50,8 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
     // splash screen
     implementation("androidx.core:core-splashscreen:1.0.0")
+    // firebase dependencies
+    implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-crashlytics")
 }
