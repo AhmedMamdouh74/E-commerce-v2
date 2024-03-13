@@ -54,4 +54,6 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:32.7.4"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-crashlytics")
+    // third party libraries
+    implementation("com.github.pwittchen:reactivenetwork-rx2:3.0.8")
 }
