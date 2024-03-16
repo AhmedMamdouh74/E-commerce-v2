@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.jetbrainsKotlinAndroid)
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
+    id("kotlin-kapt")
 
 }
 
@@ -35,6 +36,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = "1.8"
+    }
+    buildFeatures{
+        viewBinding =true
+        dataBinding =true
     }
 }
 
