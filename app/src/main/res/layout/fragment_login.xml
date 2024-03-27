@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
+
     <data>
+
         <variable
             name="viewmodel"
             type="com.example.e_commerce_v2.ui.auth.viewmodel.LoginViewModel" />
@@ -50,7 +52,7 @@
                 android:drawableStart="@drawable/ic_email"
                 android:hint="@string/email_et_hint"
                 android:inputType="textEmailAddress"
-               />
+                android:text="@={viewmodel.email}" />
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/password_et"
@@ -61,7 +63,7 @@
                 android:drawableStart="@drawable/ic_password"
                 android:hint="@string/password_et_hint"
                 android:inputType="textPassword"
-                />
+                android:text="@={viewmodel.password}" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/login_btn"
