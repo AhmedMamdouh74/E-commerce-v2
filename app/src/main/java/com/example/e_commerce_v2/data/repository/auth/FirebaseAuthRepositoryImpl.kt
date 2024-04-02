@@ -1,6 +1,7 @@
 package com.example.e_commerce_v2.data.repository.auth
 
 import com.example.e_commerce_v2.data.models.Resource
+import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import kotlinx.coroutines.flow.Flow
@@ -44,6 +45,23 @@ class FirebaseAuthRepositoryImpl(private val auth: FirebaseAuth = FirebaseAuth.g
             emit(Resource.Error(e))
         }
     }
+
+    override suspend fun loginWithFacebook(token: String): Flow<Resource<String>> = flow {
+        try {
+            emit(Resource.Loading())
+            val firebaseCredential = FacebookAuthProvider.getCredential(token)
+            val firebaseAuthResult= auth.signInWithCredential(firebaseCredential).await()
+            firebaseAuthResult.user?.let { user ->
+                emit(Resource.Success(user.uid)) // emit the user ID
+            } ?: run {
+                emit(Resource.Error(Exception("User not found")))
+            }
+
+        }catch (e: Exception){
+            emit(Resource.Error(e))
+        }
+    }
+
     companion object {
         private const val TAG = "FirebaseAuthRepositoryI"
     }

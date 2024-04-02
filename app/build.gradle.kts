@@ -35,6 +35,22 @@ android {
                 "clientServerId",
                 "\"1084674581230-mbbl6mp9naretbkp6rur87iie8d9cfqq.apps.googleusercontent.com\""
             )
+            it.resValue(
+                "string",
+                "facebook_app_id",
+                "\"1225524781758267\""
+            )
+            it.resValue(
+                "string",
+                "facebook_client_token",
+                "\"c10d277afa687f81b2527f64a5ee0d85\""
+            )
+            it.resValue(
+                "string",
+                "fb_login_protocol_scheme",
+                "\"fb1225524781758267\""
+            )
+
         }
         compileOptions {
             sourceCompatibility = JavaVersion.VERSION_1_8
@@ -68,6 +84,7 @@ android {
         implementation("com.google.firebase:firebase-firestore-ktx")
         implementation("com.google.firebase:firebase-auth-ktx")
         implementation("com.google.android.gms:play-services-auth:21.0.0")
+        implementation ("com.facebook.android:facebook-login:16.0.0")
         // third party libraries
         implementation("com.github.pwittchen:reactivenetwork-rx2:3.0.8")
         // navigation component

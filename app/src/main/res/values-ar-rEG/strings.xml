@@ -17,5 +17,6 @@
     <string name="retry">Retry</string>
     <string name="google_sign_in_field_msg">Google sign in failed, please retry again later.</string>
     <string name="generic_err_msg">Error please try again later.</string>
+    <string name="facebook_sign_msg">Login with Facebook</string>
 
 </resources>
