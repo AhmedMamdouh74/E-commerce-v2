@@ -4,6 +4,8 @@ plugins {
     id("com.google.gms.google-services")
     id("com.google.firebase.crashlytics")
     id("kotlin-kapt")
+    id("kotlin-parcelize")
+    id("com.google.protobuf") version "0.9.4" apply true
 
 }
 
@@ -93,7 +95,27 @@ android {
         implementation("androidx.navigation:navigation-ui-ktx:$nav_version")
         // Feature module Support
         implementation("androidx.navigation:navigation-dynamic-features-fragment:$nav_version")
+
+        implementation("com.google.protobuf:protobuf-kotlin-lite:4.26.0")
         // data store
         implementation("androidx.datastore:datastore-preferences:1.0.0")
+    }
+}
+// Setup protobuf configuration, generating lite Java and Kotlin classes
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.26.1"
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                register("java") {
+                    option("lite")
+                }
+                register("kotlin") {
+                    option("lite")
+                }
+            }
+        }
     }
 }
