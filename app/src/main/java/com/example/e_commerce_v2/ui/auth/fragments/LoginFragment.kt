@@ -1,6 +1,5 @@
 package com.example.e_commerce_v2.ui.auth.fragments
 
-import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
@@ -14,11 +13,8 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.example.e_commerce_v2.BuildConfig
 import com.example.e_commerce_v2.R
-import com.example.e_commerce_v2.data.datasource.datastore.UserPreferencesDataSource
 import com.example.e_commerce_v2.data.models.Resource
-import com.example.e_commerce_v2.data.repository.auth.FirebaseAuthRepositoryImpl
 import com.example.e_commerce_v2.databinding.FragmentLoginBinding
-import com.example.e_commerce_v2.data.repository.user.UserDataStoreRepositoryImpl
 import com.example.e_commerce_v2.ui.auth.viewmodel.LoginViewModel
 import com.example.e_commerce_v2.ui.auth.viewmodel.LoginViewModelFactory
 import com.example.e_commerce_v2.ui.common.customviews.ProgressDialog
@@ -30,7 +26,6 @@ import com.facebook.CallbackManager
 import com.facebook.FacebookException
 import com.facebook.login.LoginResult
 import com.facebook.FacebookCallback
-import com.facebook.login.LoginBehavior
 import com.facebook.login.LoginManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -38,10 +33,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
-import com.google.firebase.auth.FacebookAuthProvider
-import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
-import java.util.Arrays
 
 
 class LoginFragment : Fragment() {
@@ -52,12 +44,7 @@ class LoginFragment : Fragment() {
 
     private val loginViewModel: LoginViewModel by viewModels {
         LoginViewModelFactory(
-            userPrefs = UserDataStoreRepositoryImpl(
-                UserPreferencesDataSource(
-                    requireActivity()
-                )
-            ),
-            firebaseAuth = FirebaseAuthRepositoryImpl()
+            requireContext()
 
         )
     }
@@ -217,7 +204,7 @@ class LoginFragment : Fragment() {
             callbackManager,
             listOf("email", "public_profile"),
 
-        )
+            )
 
     }
 
