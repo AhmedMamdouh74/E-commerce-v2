@@ -1,70 +1,70 @@
 package com.example.e_commerce_v2.ui.home
 
-import android.animation.ObjectAnimator
-import android.annotation.SuppressLint
+
 import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.view.animation.AnticipateInterpolator
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.animation.doOnEnd
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.lifecycleScope
 import com.example.e_commerce_v2.R
-import com.example.e_commerce_v2.data.datasource.datastore.UserPreferencesDataSource
-import com.example.e_commerce_v2.data.repository.user.UserDataStoreRepositoryImpl
 import com.example.e_commerce_v2.ui.auth.AuthActivity
 import com.example.e_commerce_v2.ui.common.viewmodel.UserViewModel
 import com.example.e_commerce_v2.ui.common.viewmodel.UserViewModelFactory
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : AppCompatActivity() {
     private val userViewModel: UserViewModel by viewModels {
-        UserViewModelFactory(UserDataStoreRepositoryImpl(UserPreferencesDataSource(this)))
+        UserViewModelFactory(context = this)
     }
-    @SuppressLint("MissingInflatedId")
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
         initSplashScreen()
-
-        lifecycleScope.launch(Dispatchers.Main) {
-            val isLoggedIn = userViewModel.isUserLoggedIn().first()
-            Log.d(TAG, "onCreate: isLoggedIn: $isLoggedIn")
-            if (isLoggedIn) {
-                setContentView(R.layout.activity_main)
-            } else {
-                goToAuthActivity()
-            }
+        super.onCreate(savedInstanceState)
+        val isLoggedIn = runBlocking { userViewModel.isUserLoggedIn().first() }
+        if (!isLoggedIn) {
+            goToAuthActivity()
+            return
         }
-        Log.d(TAG, "onCreate: ")
+
+        setContentView(R.layout.activity_main)
+        findViewById<View>(R.id.textView).setOnClickListener {
+            logOut()
+        }
+
+        initViewModel()
     }
-    private fun initSplashScreen() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            installSplashScreen()
-            splashScreen.setOnExitAnimationListener { splashScreenView ->
-                // Create your custom animation.
-                val slideUp = ObjectAnimator.ofFloat(
-                    splashScreenView, View.TRANSLATION_Y, 0f, -splashScreenView.height.toFloat()
-                )
-                slideUp.interpolator = AnticipateInterpolator()
-                slideUp.duration = 1000L
 
-                // Call SplashScreenView.remove at the end of your custom animation.
-                slideUp.doOnEnd { splashScreenView.remove() }
+    private fun initViewModel() {
+        lifecycleScope.launch {
+            val userDetails = runBlocking { userViewModel.getUserDetails().first() }
+            Log.d(TAG, "initViewModel: user details ${userDetails.email}")
 
-                // Run your animation.
-                slideUp.start()
+            userViewModel.userDetailsState.collect {
+                Log.d(TAG, "initViewModel: user details updated ${it?.email}")
             }
-        } else {
-            setTheme(R.style.Theme_ECommerceV2)
+
         }
     }
+
+    private fun logOut() {
+        lifecycleScope.launch {
+            userViewModel.logOut()
+            goToAuthActivity()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(TAG, "onResume: ")
+    }
+
     private fun goToAuthActivity() {
         val intent = Intent(this, AuthActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -75,7 +75,16 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent, options.toBundle())
         finish()
     }
-    companion object{
-        const val TAG="MainActivity"
+
+    private fun initSplashScreen() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            installSplashScreen()
+        } else {
+            setTheme(R.style.Theme_ECommerceV2)
+        }
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
     }
 }
