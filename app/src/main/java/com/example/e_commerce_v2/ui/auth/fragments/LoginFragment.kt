@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
 import com.example.e_commerce_v2.BuildConfig
 import com.example.e_commerce_v2.R
 import com.example.e_commerce_v2.data.models.Resource
@@ -49,13 +50,13 @@ class LoginFragment : Fragment() {
         )
     }
 
-    private var _Binding: FragmentLoginBinding? = null
-    private val binding get() = _Binding!!
+    private var _binding: FragmentLoginBinding? = null
+    private val binding get() = _binding!!
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        _Binding = FragmentLoginBinding.inflate(inflater, container, false)
+        _binding = FragmentLoginBinding.inflate(inflater, container, false)
         binding.lifecycleOwner = viewLifecycleOwner
         binding.viewmodel = loginViewModel
         return binding.root
@@ -110,12 +111,15 @@ class LoginFragment : Fragment() {
         binding.facebookSigninBtn.setOnClickListener {
             signInWithFacebook()
         }
+        binding.registerTv.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
+        }
     }
 
 
     override fun onDestroy() {
         super.onDestroy()
-        _Binding = null
+        _binding = null
     }
 
 
@@ -182,7 +186,8 @@ class LoginFragment : Fragment() {
             object : FacebookCallback<LoginResult> {
                 override fun onSuccess(loginResult: LoginResult) {
                     Log.d(TAG, "onSuccess: ")
-                    handleFacebookAccessToken(loginResult.accessToken)
+                    val token = loginResult.accessToken.token
+                    handleFacebookAccessToken(token)
                 }
 
                 override fun onCancel() {
@@ -216,8 +221,8 @@ class LoginFragment : Fragment() {
         callbackManager.onActivityResult(requestCode, resultCode, data)
     }
 
-    private fun handleFacebookAccessToken(token: AccessToken) {
-        loginViewModel.loginWithFacebook(token.token)
+    private fun handleFacebookAccessToken(token: String) {
+        loginViewModel.loginWithFacebook(token)
     }
 
     companion object {

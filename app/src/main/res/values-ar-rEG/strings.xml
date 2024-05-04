@@ -10,7 +10,7 @@
     <string name="or">Or</string>
     <string name="google_signin_btn_msg">Login with Google</string>
     <string name="forgot_password_msg">Forgot Password?</string>
-    <string name="have_a_account_msg">Don’t have a account?</string>
+    <string name="dont_have_a_account_msg">Don’t have a account?</string>
     <string name="register">Register</string>
     <string name="loading">Loading</string>
     <string name="ok">OK</string>
@@ -18,5 +18,12 @@
     <string name="google_sign_in_field_msg">Google sign in failed, please retry again later.</string>
     <string name="generic_err_msg">Error please try again later.</string>
     <string name="facebook_sign_msg">Login with Facebook</string>
+    <string name="register_msg">create a new account</string>
+    <string name="name_et_hint">Full Name</string>
+    <string name="confirm_password_et_hint">Password Again</string>
+    <string name="sign_up">sign up</string>
+    <string name="google_signup_btn_msg">Sign Up With Google</string>
+    <string name="facebook_sign_up_msg">Sign Up With Facebook</string>
+    <string name="have_an_account_msg">have an account?</string>
 
 </resources>

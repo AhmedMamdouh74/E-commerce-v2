@@ -36,6 +36,51 @@ class FirebaseAuthRepositoryImpl(
             auth.signInWithCredential(credential).await()
         }
 
+    override suspend fun registerWithEmailAndPassword(
+        name: String,
+        email: String,
+        password: String
+    ): Flow<Resource<UserDetailsModel>> = flow {
+        try {
+            emit(Resource.Loading())
+
+            // Perform Firebase Auth sign in
+            val authResult = auth.createUserWithEmailAndPassword(email, password).await()
+            val userId = authResult.user?.uid
+
+            if (userId == null) {
+                val msg = "Sign in UserID not found"
+                logAuthIssueToCrashlytics(msg, AuthProvider.EMAIL.name)
+                emit(Resource.Error(Exception(msg)))
+                return@flow
+            }
+            val userDetails = UserDetailsModel(name = name, email = email, id = userId, createdAt = System.currentTimeMillis())
+
+            // Save user details to Firestore
+            firestore.collection("users").document(userId).set(userDetails).await()
+
+            // Retrieve the user details after saving
+            val updatedUserDoc = firestore.collection("users").document(userId).get().await()
+            val retrievedUserDetails = updatedUserDoc.toObject(UserDetailsModel::class.java)
+
+            // Emit success with retrieved details (optional)
+            retrievedUserDetails?.let {
+                emit(Resource.Success(it))
+            } ?: run {
+                val msg = "Error retrieving user details after registration, user id = $userId"
+                logAuthIssueToCrashlytics(msg, AuthProvider.EMAIL.name)
+                emit(Resource.Error(Exception(msg)))
+            }
+
+        } catch (e: Exception) {
+            logAuthIssueToCrashlytics(
+                e.message ?: "Unknown error from exception = ${e::class.java}",
+                AuthProvider.EMAIL.name
+            )
+            emit(Resource.Error(e)) // Emit error
+        }
+    }
+
     override fun logout() {
         auth.signOut()
     }
