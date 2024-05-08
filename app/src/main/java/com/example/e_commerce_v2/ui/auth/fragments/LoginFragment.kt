@@ -19,6 +19,7 @@ import com.example.e_commerce_v2.databinding.FragmentLoginBinding
 import com.example.e_commerce_v2.ui.auth.viewmodel.LoginViewModel
 import com.example.e_commerce_v2.ui.auth.viewmodel.LoginViewModelFactory
 import com.example.e_commerce_v2.ui.common.customviews.ProgressDialog
+import com.example.e_commerce_v2.ui.home.MainActivity
 import com.example.e_commerce_v2.ui.showSnakeBarError
 import com.example.e_commerce_v2.utils.CrashlyticsUtils
 import com.example.e_commerce_v2.utils.LoginException
@@ -92,6 +93,7 @@ class LoginFragment : Fragment() {
 
                         is Resource.Success -> {
                             progressDialog.dismiss()
+                            goToHome()
 
 
                         }
@@ -173,6 +175,12 @@ class LoginFragment : Fragment() {
         loginManager.logOut()
         Log.d(TAG, "signOut: ")
     }
+    private fun goToHome() {
+        requireActivity().startActivity(Intent(activity, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        })
+        requireActivity().finish()
+    }
 
     private fun isLoggedIn(): Boolean {
         val accessToken = AccessToken.getCurrentAccessToken()
@@ -185,9 +193,9 @@ class LoginFragment : Fragment() {
             callbackManager,
             object : FacebookCallback<LoginResult> {
                 override fun onSuccess(loginResult: LoginResult) {
-                    Log.d(TAG, "onSuccess: ")
                     val token = loginResult.accessToken.token
-                    handleFacebookAccessToken(token)
+                    Log.d(TAG, "onSuccess: $token")
+                    firebaseAuthWithFacebook(token)
                 }
 
                 override fun onCancel() {
@@ -221,7 +229,7 @@ class LoginFragment : Fragment() {
         callbackManager.onActivityResult(requestCode, resultCode, data)
     }
 
-    private fun handleFacebookAccessToken(token: String) {
+    private fun firebaseAuthWithFacebook(token: String) {
         loginViewModel.loginWithFacebook(token)
     }
 
