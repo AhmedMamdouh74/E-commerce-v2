@@ -78,6 +78,26 @@ class RegisterViewModel(
             }
         }
 
+     fun registerWithFacebook(token: String) =
+        viewModelScope.launch(IO) {
+            val result = authRepository.registerWithFacebook(token)
+            result.collect { resource ->
+                resource
+                when (resource) {
+
+                    is Resource.Success -> {
+                        savePreferenceData(resource.data!!)
+                        _registerState.emit(Resource.Success(resource.data!!))
+                    }
+
+                    else -> {
+                        _registerState.emit(resource)
+                    }
+                }
+
+            }
+        }
+
     private suspend fun savePreferenceData(userDetailsModel: UserDetailsModel) {
         appPreferenceRepository.saveLoginState(true)
         userPreferenceRepository.updateUserDetails(userDetailsModel.toUserDetailsPreferences())

@@ -1,5 +1,7 @@
 package com.example.e_commerce_v2.ui.auth.fragments
 
+import android.content.DialogInterface
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -19,9 +21,17 @@ import com.example.e_commerce_v2.ui.showSnakeBarError
 import com.example.e_commerce_v2.utils.CrashlyticsUtils
 import com.example.e_commerce_v2.utils.LoginException
 import com.example.e_commerce_v2.utils.RegisterException
+import com.facebook.AccessToken
+import com.facebook.CallbackManager
+import com.facebook.FacebookCallback
+import com.facebook.FacebookException
+import com.facebook.login.LoginManager
+import com.facebook.login.LoginResult
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
 class RegisterFragment : Fragment() {
+
     private var _binding: FragmentRegisterBinding? = null
     private val registerViewModel: RegisterViewModel by viewModels {
         RegisterViewModelFactory(requireContext())
@@ -29,6 +39,8 @@ class RegisterFragment : Fragment() {
     private val progressDialog by lazy {
         ProgressDialog.createProgressDialog(requireActivity())
     }
+    private val callbackManager: CallbackManager by lazy { CallbackManager.Factory.create() }
+    private val loginManager: LoginManager by lazy { LoginManager.getInstance() }
     private val binding get() = _binding!!
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -66,8 +78,8 @@ class RegisterFragment : Fragment() {
                         }
 
                         is Resource.Success -> {
+                            showLoginSuccessfulDialog()
                             progressDialog.dismiss()
-                            Log.d(TAG, "initViewModel:Register Success")
                         }
 
                     }
@@ -80,8 +92,81 @@ class RegisterFragment : Fragment() {
         binding.signInTv.setOnClickListener {
             findNavController().popBackStack()
         }
+        binding.facebookSignupBtn.setOnClickListener {
+            signUpWithFacebook()
+        }
 
 
+    }
+
+    private fun signOut() {
+        loginManager.logOut()
+        Log.d(TAG, "signOut: ")
+    }
+
+    private fun isLoggedIn(): Boolean {
+        val accessToken = AccessToken.getCurrentAccessToken()
+        return accessToken != null && !accessToken.isExpired
+    }
+
+    private fun signUpWithFacebook() {
+        if (isLoggedIn()) signOut()
+        loginManager.registerCallback(
+            callbackManager,
+            object : FacebookCallback<LoginResult> {
+                override fun onSuccess(loginResult: LoginResult) {
+                    val token = loginResult.accessToken.token
+                    Log.d(TAG, "onSuccess: $token")
+                    firebaseAuthWithFacebook(token)
+                }
+
+                override fun onCancel() {
+                    Log.d(TAG, "facebook:onCancel")
+
+                }
+
+                override fun onError(error: FacebookException) {
+                    view?.showSnakeBarError(error.message ?: getString(R.string.generic_err_msg))
+                    val msg = error.message ?: getString(R.string.generic_err_msg)
+                    logAuthIssueToCrashlytics(msg, "Facebook")
+                }
+            },
+        )
+
+
+        loginManager.logInWithReadPermissions(
+            this,
+            callbackManager,
+            listOf("email", "public_profile"),
+
+            )
+
+    }
+
+    // ...
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        // Pass the activity result back to the Facebook SDK
+        callbackManager.onActivityResult(requestCode, resultCode, data)
+    }
+
+    private fun firebaseAuthWithFacebook(token: String) {
+        registerViewModel.registerWithFacebook(token)
+    }
+
+    fun showLoginSuccessfulDialog() {
+        MaterialAlertDialogBuilder(requireActivity())
+            .setTitle("Register success")
+            .setMessage("we have sent you an email verification link. please verify your email to login.")
+            .setPositiveButton(
+                "OK"
+            ) { dialog, _ ->
+                dialog?.dismiss()
+                findNavController().popBackStack()
+            }
+            .create()
+            .show()
 
     }
 
@@ -97,7 +182,8 @@ class RegisterFragment : Fragment() {
         super.onDestroy()
         _binding = null
     }
-    companion object{
+
+    companion object {
         private const val TAG = "RegisterFragment"
     }
 }

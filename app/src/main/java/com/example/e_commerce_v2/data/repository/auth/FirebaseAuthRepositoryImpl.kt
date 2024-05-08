@@ -36,6 +36,47 @@ class FirebaseAuthRepositoryImpl(
             auth.signInWithCredential(credential).await()
         }
 
+    override suspend fun registerWithFacebook(token: String): Flow<Resource<UserDetailsModel>> =
+        flow {
+            try {
+                emit(Resource.Loading())
+
+                // Perform Firebase Auth sign in
+                val authResult =
+                    auth.signInWithCredential(FacebookAuthProvider.getCredential(token)).await()
+                val userId = authResult.user?.uid
+                if (userId == null) {
+                    val msg = "Sign up UserID not found"
+                    logAuthIssueToCrashlytics(msg, AuthProvider.FACEBOOK.name)
+                    emit(Resource.Error(Exception(msg)))
+                    return@flow
+                }
+                val userDetails = UserDetailsModel(
+                    createdAt = System.currentTimeMillis(),
+                    id = userId,
+                    email = authResult.user?.email,
+                    name = authResult.user?.displayName
+                )
+                // Save user details to Firestore
+                firestore.collection("users").document(userId).set(userDetails).await()
+                // Retrieve the user details after saving
+                val updatedUserDoc = firestore.collection("users").document(userId).get().await()
+                val retrievedUserDetails = updatedUserDoc.toObject(UserDetailsModel::class.java)
+
+                // Emit success with retrieved details (optional)
+                retrievedUserDetails?.let {
+                    emit(Resource.Success(it))
+                }
+            } catch (e: Exception) {
+                logAuthIssueToCrashlytics(
+                    e.message ?: "Unknown error from exception = ${e::class.java}",
+                    AuthProvider.EMAIL.name
+                )
+                emit(Resource.Error(e)) // Emit error
+            }
+        }
+
+
     override suspend fun registerWithEmailAndPassword(
         name: String,
         email: String,
@@ -54,7 +95,12 @@ class FirebaseAuthRepositoryImpl(
                 emit(Resource.Error(Exception(msg)))
                 return@flow
             }
-            val userDetails = UserDetailsModel(name = name, email = email, id = userId, createdAt = System.currentTimeMillis())
+            val userDetails = UserDetailsModel(
+                createdAt = System.currentTimeMillis(),
+                id = userId,
+                email = email,
+                name = name
+            )
 
             // Save user details to Firestore
             firestore.collection("users").document(userId).set(userDetails).await()
@@ -62,6 +108,7 @@ class FirebaseAuthRepositoryImpl(
             // Retrieve the user details after saving
             val updatedUserDoc = firestore.collection("users").document(userId).get().await()
             val retrievedUserDetails = updatedUserDoc.toObject(UserDetailsModel::class.java)
+            authResult.user?.sendEmailVerification()?.await()
 
             // Emit success with retrieved details (optional)
             retrievedUserDetails?.let {
@@ -97,6 +144,13 @@ class FirebaseAuthRepositoryImpl(
 
             if (userId == null) {
                 val msg = "Sign in UserID not found"
+                logAuthIssueToCrashlytics(msg, provider.name)
+                emit(Resource.Error(Exception(msg)))
+                return@flow
+            }
+            if(authResult.user?.isEmailVerified == false){
+                authResult.user?.sendEmailVerification()?.await()
+                val msg = "Email not verified"
                 logAuthIssueToCrashlytics(msg, provider.name)
                 emit(Resource.Error(Exception(msg)))
                 return@flow
