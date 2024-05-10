@@ -150,7 +150,7 @@ class FirebaseAuthRepositoryImpl(
             }
             if(authResult.user?.isEmailVerified == false){
                 authResult.user?.sendEmailVerification()?.await()
-                val msg = "Email not verified"
+                val msg = "Email not verified, verification email sent"
                 logAuthIssueToCrashlytics(msg, provider.name)
                 emit(Resource.Error(Exception(msg)))
                 return@flow
