@@ -7,3 +7,14 @@ plugins {
     id("com.google.firebase.crashlytics") version "2.9.9" apply false
 
 }
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath("com.google.android.gms:oss-licenses-plugin:0.10.6") {
+            exclude(group = "com.google.protobuf")
+        }
+    }
+}

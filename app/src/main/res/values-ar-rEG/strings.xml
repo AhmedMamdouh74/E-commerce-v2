@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">E-commerce-v2</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
@@ -24,4 +25,5 @@
     <string name="google_signup_btn_msg">Sign Up With Google</string>
     <string name="facebook_sign_up_msg">Sign Up With Facebook</string>
     <string name="have_an_account_msg">have an account?</string>
+
 </resources>

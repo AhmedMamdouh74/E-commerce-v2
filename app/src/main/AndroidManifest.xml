@@ -1,10 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.INTERNET"/>
-<!-- android:allowClearUserData="true"
-it's allow the app support any given url (http) certified or not
--->
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+
+    <!-- android:android:usesCleartextTraffic="true"
+    it's allow the app support any given url (http) certified or not
+    -->
 
     <application
         android:name=".MyApplication"
@@ -16,18 +19,27 @@ it's allow the app support any given url (http) certified or not
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ECommerceV2"
-        android:allowClearUserData="true"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
             android:name=".ui.home.MainActivity"
-            android:theme="@style/Theme.MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:theme="@style/Theme.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".ui.auth.AuthActivity"
+            android:exported="true"
+            />
+        <meta-data
+            android:name="com.facebook.sdk.ApplicationId"
+            android:value="@string/facebook_app_id" />
+        <meta-data
+            android:name="com.facebook.sdk.ClientToken"
+            android:value="@string/facebook_client_token" />
     </application>
 
 </manifest>
