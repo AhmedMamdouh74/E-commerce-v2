@@ -5,6 +5,7 @@ import com.example.e_commerce_v2.data.models.user.AuthProvider
 import com.example.e_commerce_v2.data.models.user.UserDetailsModel
 import com.example.e_commerce_v2.utils.CrashlyticsUtils
 import com.example.e_commerce_v2.utils.LoginException
+import com.google.firebase.auth.AuthCredential
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FacebookAuthProvider
 import com.google.firebase.auth.FirebaseAuth
@@ -62,6 +63,12 @@ class FirebaseAuthRepositoryImpl(
                 // Retrieve the user details after saving
                 val updatedUserDoc = firestore.collection("users").document(userId).get().await()
                 val retrievedUserDetails = updatedUserDoc.toObject(UserDetailsModel::class.java)
+                if (updatedUserDoc.exists()) {
+                    val msg = " registered user found in firestore, please retry with another one."
+                    logAuthIssueToCrashlytics(msg, AuthProvider.GOOGLE.name)
+                    emit(Resource.Error(Exception(msg)))
+                    return@flow
+                }
 
                 // Emit success with retrieved details (optional)
                 retrievedUserDetails?.let {
@@ -108,6 +115,12 @@ class FirebaseAuthRepositoryImpl(
             // Retrieve the user details after saving
             val updatedUserDoc = firestore.collection("users").document(userId).get().await()
             val retrievedUserDetails = updatedUserDoc.toObject(UserDetailsModel::class.java)
+            if (updatedUserDoc.exists()) {
+                val msg = " registered user found in firestore, please retry with another one."
+                logAuthIssueToCrashlytics(msg, AuthProvider.GOOGLE.name)
+                emit(Resource.Error(Exception(msg)))
+                return@flow
+            }
             authResult.user?.sendEmailVerification()?.await()
 
             // Emit success with retrieved details (optional)
@@ -127,6 +140,61 @@ class FirebaseAuthRepositoryImpl(
             emit(Resource.Error(e)) // Emit error
         }
     }
+
+    override suspend fun registerWithGoogle(idToken: String): Flow<Resource<UserDetailsModel>> =
+        flow {
+            try {
+                emit(Resource.Loading())
+                // Perform Firebase Auth sign in
+
+                val authResult =
+                    auth.signInWithCredential(GoogleAuthProvider.getCredential(idToken, null))
+                        .await()
+                val msg = "Sign up UserID not found"
+                val userId = authResult.user?.uid
+                if (userId == null) {
+                    logAuthIssueToCrashlytics(msg, AuthProvider.EMAIL.name)
+                    emit(Resource.Error(Exception(msg)))
+                    return@flow
+                }
+
+                val userDetails = UserDetailsModel(
+                    createdAt = System.currentTimeMillis(),
+                    id = userId,
+                    email = authResult.user?.email,
+                    name = authResult.user?.displayName
+                )
+                // Save user details to Firestore
+                firestore.collection("users").document(userId).set(userDetails).await()
+                // Retrieve the user details after saving
+                val updatedUserDoc = firestore.collection("users").document(userId).get().await()
+                val retrievedUserDetails = updatedUserDoc.toObject(UserDetailsModel::class.java)
+                if (updatedUserDoc.exists()) {
+                    val msg = " registered user found in firestore, please retry with another one."
+                    logAuthIssueToCrashlytics(msg, AuthProvider.GOOGLE.name)
+                    emit(Resource.Error(Exception(msg)))
+                    return@flow
+                }
+                authResult.user?.sendEmailVerification()?.await()
+
+                // Emit success with retrieved details (optional)
+                retrievedUserDetails?.let {
+                    emit(Resource.Success(it))
+                } ?: run {
+                    val msg = "Error retrieving user details after registration, user id = $userId"
+                    logAuthIssueToCrashlytics(msg, AuthProvider.GOOGLE.name)
+                    emit(Resource.Error(Exception(msg)))
+                }
+
+
+            } catch (e: Exception) {
+                logAuthIssueToCrashlytics(
+                    e.message ?: "Unknown error from exception = ${e::class.java}",
+                    AuthProvider.GOOGLE.name
+                )
+                emit(Resource.Error(e)) // Emit error
+            }
+        }
 
     override fun logout() {
         auth.signOut()
@@ -148,7 +216,7 @@ class FirebaseAuthRepositoryImpl(
                 emit(Resource.Error(Exception(msg)))
                 return@flow
             }
-            if(authResult.user?.isEmailVerified == false){
+            if (authResult.user?.isEmailVerified == false) {
                 authResult.user?.sendEmailVerification()?.await()
                 val msg = "Email not verified, verification email sent"
                 logAuthIssueToCrashlytics(msg, provider.name)

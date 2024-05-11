@@ -46,7 +46,6 @@ class RegisterViewModel(
         val name = name.value
         val email = email.value
         val password = password.value
-        val confirmPassword = confirmPassword.value
         if (isRegisterIsValid.first()) {
             registerWithEmailAndPassword(name, email, password)
 
@@ -66,7 +65,6 @@ class RegisterViewModel(
                 when (resource) {
 
                     is Resource.Success -> {
-                        savePreferenceData(resource.data!!)
                         _registerState.emit(Resource.Success(resource.data!!))
                     }
 
@@ -86,7 +84,24 @@ class RegisterViewModel(
                 when (resource) {
 
                     is Resource.Success -> {
-                        savePreferenceData(resource.data!!)
+                        _registerState.emit(Resource.Success(resource.data!!))
+                    }
+
+                    else -> {
+                        _registerState.emit(resource)
+                    }
+                }
+
+            }
+        }
+    fun registerWithGoogle(token: String) =
+        viewModelScope.launch(IO) {
+            val result = authRepository.registerWithGoogle(token)
+            result.collect { resource ->
+                resource
+                when (resource) {
+
+                    is Resource.Success -> {
                         _registerState.emit(Resource.Success(resource.data!!))
                     }
 

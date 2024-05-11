@@ -1,16 +1,18 @@
 package com.example.e_commerce_v2.ui.auth.fragments
 
-import android.content.DialogInterface
 import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.example.e_commerce_v2.BuildConfig
 import com.example.e_commerce_v2.R
 import com.example.e_commerce_v2.data.models.Resource
 import com.example.e_commerce_v2.databinding.FragmentRegisterBinding
@@ -19,7 +21,6 @@ import com.example.e_commerce_v2.ui.auth.viewmodel.RegisterViewModelFactory
 import com.example.e_commerce_v2.ui.common.customviews.ProgressDialog
 import com.example.e_commerce_v2.ui.showSnakeBarError
 import com.example.e_commerce_v2.utils.CrashlyticsUtils
-import com.example.e_commerce_v2.utils.LoginException
 import com.example.e_commerce_v2.utils.RegisterException
 import com.facebook.AccessToken
 import com.facebook.CallbackManager
@@ -27,6 +28,12 @@ import com.facebook.FacebookCallback
 import com.facebook.FacebookException
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
@@ -42,6 +49,17 @@ class RegisterFragment : Fragment() {
     private val callbackManager: CallbackManager by lazy { CallbackManager.Factory.create() }
     private val loginManager: LoginManager by lazy { LoginManager.getInstance() }
     private val binding get() = _binding!!
+    // ActivityResultLauncher for the sign-in intent
+    private val launcher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == AppCompatActivity.RESULT_OK) {
+                val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                handleSignInResult(task)
+            } else {
+                view?.showSnakeBarError(getString(R.string.google_sign_in_field_msg))
+            }
+        }
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View? {
@@ -95,6 +113,9 @@ class RegisterFragment : Fragment() {
         binding.facebookSignupBtn.setOnClickListener {
             signUpWithFacebook()
         }
+        binding.googleSignupBtn.setOnClickListener {
+            signUpWithGoogle()
+        }
 
 
     }
@@ -108,6 +129,34 @@ class RegisterFragment : Fragment() {
         val accessToken = AccessToken.getCurrentAccessToken()
         return accessToken != null && !accessToken.isExpired
     }
+
+
+    private fun signUpWithGoogle() {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(BuildConfig.clientServerId).requestEmail().requestProfile()
+            .requestServerAuthCode(BuildConfig.clientServerId).build()
+        val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
+        googleSignInClient.signOut()
+        val signInIntent = googleSignInClient.signInIntent
+        launcher.launch(signInIntent)
+    }
+
+
+    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+        try {
+            val account = completedTask.getResult(ApiException::class.java)
+            firebaseAuthWithGoogle(account.idToken!!)
+        } catch (e: Exception) {
+            view?.showSnakeBarError(e.message ?: getString(R.string.generic_err_msg))
+            val msg = e.message ?: getString(R.string.generic_err_msg)
+            logAuthIssueToCrashlytics(msg, "Google")
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(token: String) {
+        registerViewModel.registerWithGoogle(token)
+    }
+
 
     private fun signUpWithFacebook() {
         if (isLoggedIn()) signOut()
@@ -155,7 +204,8 @@ class RegisterFragment : Fragment() {
         registerViewModel.registerWithFacebook(token)
     }
 
-    fun showLoginSuccessfulDialog() {
+
+    private fun showLoginSuccessfulDialog() {
         MaterialAlertDialogBuilder(requireActivity())
             .setTitle("Register success")
             .setMessage("we have sent you an email verification link. please verify your email to login.")
@@ -173,8 +223,8 @@ class RegisterFragment : Fragment() {
     private fun logAuthIssueToCrashlytics(msg: String, provider: String) {
         CrashlyticsUtils.sendCustomLogToCrashlytics<RegisterException>(
             msg,
-            CrashlyticsUtils.LOGIN_KEY to msg,
-            CrashlyticsUtils.LOGIN_PROVIDER to provider,
+            CrashlyticsUtils.REGISTER_KEY to msg,
+            CrashlyticsUtils.REGISTER_PROVIDER to provider,
         )
     }
 
