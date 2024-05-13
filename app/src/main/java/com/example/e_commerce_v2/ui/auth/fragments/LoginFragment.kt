@@ -16,6 +16,7 @@ import com.example.e_commerce_v2.BuildConfig
 import com.example.e_commerce_v2.R
 import com.example.e_commerce_v2.data.models.Resource
 import com.example.e_commerce_v2.databinding.FragmentLoginBinding
+import com.example.e_commerce_v2.ui.auth.getGoogleRequestIntent
 import com.example.e_commerce_v2.ui.auth.viewmodel.LoginViewModel
 import com.example.e_commerce_v2.ui.auth.viewmodel.LoginViewModelFactory
 import com.example.e_commerce_v2.ui.common.customviews.ProgressDialog
@@ -109,6 +110,7 @@ class LoginFragment : Fragment() {
         binding.googleSigninBtn.setOnClickListener {
             signInWithGoogle()
 
+
         }
         binding.facebookSigninBtn.setOnClickListener {
             signInWithFacebook()
@@ -137,12 +139,7 @@ class LoginFragment : Fragment() {
         }
 
     private fun signInWithGoogle() {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(BuildConfig.clientServerId).requestEmail().requestProfile()
-            .requestServerAuthCode(BuildConfig.clientServerId).build()
-        val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
-        googleSignInClient.signOut()
-        val signInIntent = googleSignInClient.signInIntent
+        val signInIntent = getGoogleRequestIntent(requireActivity())
         launcher.launch(signInIntent)
     }
 
@@ -156,6 +153,7 @@ class LoginFragment : Fragment() {
             val msg = e.message ?: getString(R.string.generic_err_msg)
             logAuthIssueToCrashlytics(msg, "Google")
         }
+
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {
@@ -175,6 +173,7 @@ class LoginFragment : Fragment() {
         loginManager.logOut()
         Log.d(TAG, "signOut: ")
     }
+
     private fun goToHome() {
         requireActivity().startActivity(Intent(activity, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
@@ -221,13 +220,6 @@ class LoginFragment : Fragment() {
 
     }
 
-    // ...
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        // Pass the activity result back to the Facebook SDK
-        callbackManager.onActivityResult(requestCode, resultCode, data)
-    }
 
     private fun firebaseAuthWithFacebook(token: String) {
         loginViewModel.loginWithFacebook(token)

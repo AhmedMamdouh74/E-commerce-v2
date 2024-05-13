@@ -16,6 +16,7 @@ import com.example.e_commerce_v2.BuildConfig
 import com.example.e_commerce_v2.R
 import com.example.e_commerce_v2.data.models.Resource
 import com.example.e_commerce_v2.databinding.FragmentRegisterBinding
+import com.example.e_commerce_v2.ui.auth.getGoogleRequestIntent
 import com.example.e_commerce_v2.ui.auth.viewmodel.RegisterViewModel
 import com.example.e_commerce_v2.ui.auth.viewmodel.RegisterViewModelFactory
 import com.example.e_commerce_v2.ui.common.customviews.ProgressDialog
@@ -49,12 +50,13 @@ class RegisterFragment : Fragment() {
     private val callbackManager: CallbackManager by lazy { CallbackManager.Factory.create() }
     private val loginManager: LoginManager by lazy { LoginManager.getInstance() }
     private val binding get() = _binding!!
+
     // ActivityResultLauncher for the sign-in intent
     private val launcher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == AppCompatActivity.RESULT_OK) {
                 val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                handleSignInResult(task)
+                handleSignUpResult(task)
             } else {
                 view?.showSnakeBarError(getString(R.string.google_sign_in_field_msg))
             }
@@ -120,29 +122,14 @@ class RegisterFragment : Fragment() {
 
     }
 
-    private fun signOut() {
-        loginManager.logOut()
-        Log.d(TAG, "signOut: ")
-    }
-
-    private fun isLoggedIn(): Boolean {
-        val accessToken = AccessToken.getCurrentAccessToken()
-        return accessToken != null && !accessToken.isExpired
-    }
-
 
     private fun signUpWithGoogle() {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(BuildConfig.clientServerId).requestEmail().requestProfile()
-            .requestServerAuthCode(BuildConfig.clientServerId).build()
-        val googleSignInClient: GoogleSignInClient = GoogleSignIn.getClient(requireActivity(), gso)
-        googleSignInClient.signOut()
-        val signInIntent = googleSignInClient.signInIntent
+        val signInIntent = getGoogleRequestIntent(requireActivity())
         launcher.launch(signInIntent)
     }
 
 
-    private fun handleSignInResult(completedTask: Task<GoogleSignInAccount>) {
+    private fun handleSignUpResult(completedTask: Task<GoogleSignInAccount>) {
         try {
             val account = completedTask.getResult(ApiException::class.java)
             firebaseAuthWithGoogle(account.idToken!!)
@@ -155,6 +142,16 @@ class RegisterFragment : Fragment() {
 
     private fun firebaseAuthWithGoogle(token: String) {
         registerViewModel.registerWithGoogle(token)
+    }
+
+    private fun signOut() {
+        loginManager.logOut()
+        Log.d(TAG, "signOut: ")
+    }
+
+    private fun isLoggedIn(): Boolean {
+        val accessToken = AccessToken.getCurrentAccessToken()
+        return accessToken != null && !accessToken.isExpired
     }
 
 
@@ -192,13 +189,6 @@ class RegisterFragment : Fragment() {
 
     }
 
-    // ...
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        super.onActivityResult(requestCode, resultCode, data)
-
-        // Pass the activity result back to the Facebook SDK
-        callbackManager.onActivityResult(requestCode, resultCode, data)
-    }
 
     private fun firebaseAuthWithFacebook(token: String) {
         registerViewModel.registerWithFacebook(token)
