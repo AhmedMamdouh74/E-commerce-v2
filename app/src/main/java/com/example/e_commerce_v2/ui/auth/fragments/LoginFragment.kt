@@ -52,6 +52,7 @@ class LoginFragment : Fragment() {
         )
     }
 
+
     private var _binding: FragmentLoginBinding? = null
     private val binding get() = _binding!!
     override fun onCreateView(
@@ -117,6 +118,10 @@ class LoginFragment : Fragment() {
         }
         binding.registerTv.setOnClickListener {
             findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
+        }
+        binding.forgetPassword.setOnClickListener {
+            val forgetPasswordFragment = ForgetPasswordFragment()
+            forgetPasswordFragment.show(requireActivity().supportFragmentManager, "forget-password")
         }
     }
 
