@@ -18,6 +18,7 @@ interface FirebaseAuthRepository {
         email: String,
         password: String
     ): Flow<Resource<UserDetailsModel>>
+    suspend fun sendPasswordResetEmail(email: String): Flow<Resource<String>>
 
     fun logout()
 

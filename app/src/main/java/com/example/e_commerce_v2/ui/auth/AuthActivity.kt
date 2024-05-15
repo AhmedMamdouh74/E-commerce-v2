@@ -14,5 +14,6 @@ class AuthActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_auth)
 
+
     }
 }
