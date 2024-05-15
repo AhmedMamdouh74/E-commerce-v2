@@ -16,6 +16,7 @@ object CrashlyticsUtils {
     const val ADD_TOCART_KEY = "ADD_TOCART_KEY"
     const val LOGIN_KEY = "LOGIN_KEY"
     const val REGISTER_KEY = "REGISTER_KEY"
+    const val FORGOT_PASSWORD_KEY = "FORGOT_PASSWORD_KEY"
     const val LOGIN_PROVIDER = "LOGIN_PROVIDER"
     const val REGISTER_PROVIDER = "REGISTER_PROVIDER"
     const val LISTEN_TO_USER_DETAILS = "LISTEN_TO_USER_DETAILS"
@@ -53,4 +54,5 @@ class CustomCrashlyticsLogException(message: String) : Exception(message)
 class AddToCartException(message: String) : Exception(message)
 class LoginException(message: String) : Exception(message)
 class RegisterException(message: String) : Exception(message)
+class ForgetPasswordException(message: String) : Exception(message)
 class UserDetailsException(message: String) : Exception(message)

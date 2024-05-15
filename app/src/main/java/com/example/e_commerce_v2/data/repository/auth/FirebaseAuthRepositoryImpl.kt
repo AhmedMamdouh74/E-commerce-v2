@@ -137,6 +137,17 @@ class FirebaseAuthRepositoryImpl(
         }
     }
 
+    override suspend fun sendPasswordResetEmail(email: String): Flow<Resource<String>> = flow {
+        try {
+            emit(Resource.Loading())
+            auth.sendPasswordResetEmail(email).await()
+            emit(Resource.Success("Password reset email sent"))
+
+        } catch (e: Exception) {
+            emit(Resource.Error(e)) // Emit error
+        }
+    }
+
     override suspend fun registerWithGoogle(idToken: String): Flow<Resource<UserDetailsModel>> =
         flow {
             try {
