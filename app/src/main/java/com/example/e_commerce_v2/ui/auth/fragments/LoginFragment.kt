@@ -12,7 +12,6 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.example.e_commerce_v2.BuildConfig
 import com.example.e_commerce_v2.R
 import com.example.e_commerce_v2.data.models.Resource
 import com.example.e_commerce_v2.databinding.FragmentLoginBinding
@@ -32,8 +31,6 @@ import com.facebook.FacebookCallback
 import com.facebook.login.LoginManager
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import kotlinx.coroutines.launch
@@ -121,6 +118,7 @@ class LoginFragment : Fragment() {
         }
         binding.forgetPassword.setOnClickListener {
             val forgetPasswordFragment = ForgetPasswordFragment()
+
             forgetPasswordFragment.show(parentFragmentManager, "forget-password")
         }
     }
