@@ -121,7 +121,7 @@ class LoginFragment : Fragment() {
         }
         binding.forgetPassword.setOnClickListener {
             val forgetPasswordFragment = ForgetPasswordFragment()
-            forgetPasswordFragment.show(requireActivity().supportFragmentManager, "forget-password")
+            forgetPasswordFragment.show(parentFragmentManager, "forget-password")
         }
     }
 
