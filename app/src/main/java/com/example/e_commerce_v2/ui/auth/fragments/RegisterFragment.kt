@@ -1,25 +1,21 @@
 package com.example.e_commerce_v2.ui.auth.fragments
 
-import android.content.Intent
-import android.os.Bundle
+
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
+
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
-import com.example.e_commerce_v2.BuildConfig
 import com.example.e_commerce_v2.R
 import com.example.e_commerce_v2.data.models.Resource
 import com.example.e_commerce_v2.databinding.FragmentRegisterBinding
 import com.example.e_commerce_v2.ui.auth.getGoogleRequestIntent
 import com.example.e_commerce_v2.ui.auth.viewmodel.RegisterViewModel
 import com.example.e_commerce_v2.ui.auth.viewmodel.RegisterViewModelFactory
-import com.example.e_commerce_v2.ui.common.customviews.ProgressDialog
+import com.example.e_commerce_v2.ui.common.fragments.BaseFragment
 import com.example.e_commerce_v2.ui.showSnakeBarError
 import com.example.e_commerce_v2.utils.CrashlyticsUtils
 import com.example.e_commerce_v2.utils.RegisterException
@@ -31,25 +27,23 @@ import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
-class RegisterFragment : Fragment() {
+class RegisterFragment : BaseFragment<FragmentRegisterBinding, RegisterViewModel>() {
 
-    private var _binding: FragmentRegisterBinding? = null
-    private val registerViewModel: RegisterViewModel by viewModels {
+
+    override val viewModel: RegisterViewModel by viewModels {
         RegisterViewModelFactory(requireContext())
     }
-    private val progressDialog by lazy {
-        ProgressDialog.createProgressDialog(requireActivity())
-    }
+
+    override fun getLayoutId(): Int = R.layout.fragment_register
+
     private val callbackManager: CallbackManager by lazy { CallbackManager.Factory.create() }
     private val loginManager: LoginManager by lazy { LoginManager.getInstance() }
-    private val binding get() = _binding!!
+
 
     // ActivityResultLauncher for the sign-in intent
     private val launcher =
@@ -62,25 +56,15 @@ class RegisterFragment : Fragment() {
             }
         }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        _binding = FragmentRegisterBinding.inflate(inflater, container, false)
-        binding.lifecycleOwner = viewLifecycleOwner
-        binding.viewModel = registerViewModel
-        return binding.root
-    }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    override fun init() {
         initViewModel()
         initListeners()
     }
 
     private fun initViewModel() {
         lifecycleScope.launch {
-            registerViewModel.registerState.collect { state ->
+            viewModel.registerState.collect { state ->
                 state?.let { resource ->
                     when (resource) {
                         is Resource.Error -> {
@@ -141,7 +125,7 @@ class RegisterFragment : Fragment() {
     }
 
     private fun firebaseAuthWithGoogle(token: String) {
-        registerViewModel.registerWithGoogle(token)
+        viewModel.registerWithGoogle(token)
     }
 
     private fun signOut() {
@@ -191,7 +175,7 @@ class RegisterFragment : Fragment() {
 
 
     private fun firebaseAuthWithFacebook(token: String) {
-        registerViewModel.registerWithFacebook(token)
+        viewModel.registerWithFacebook(token)
     }
 
 
@@ -218,10 +202,6 @@ class RegisterFragment : Fragment() {
         )
     }
 
-    override fun onDestroy() {
-        super.onDestroy()
-        _binding = null
-    }
 
     companion object {
         private const val TAG = "RegisterFragment"
