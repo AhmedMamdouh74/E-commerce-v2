@@ -15,6 +15,7 @@ import com.example.e_commerce_v2.data.repository.user.UserPreferenceRepository
 import com.example.e_commerce_v2.data.repository.user.UserPreferenceRepositoryImpl
 import com.example.e_commerce_v2.domain.models.toUserDetailsPreferences
 import com.example.e_commerce_v2.utils.isValidEmail
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -24,8 +25,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
+import javax.inject.Inject
 
-class RegisterViewModel(
+@HiltViewModel
+class RegisterViewModel @Inject constructor(
     private val appPreferenceRepository: AppPreferenceRepository,
     private val userPreferenceRepository: UserPreferenceRepository,
     private val authRepository: FirebaseAuthRepository
@@ -120,19 +123,3 @@ class RegisterViewModel(
 }
 
 
-class RegisterViewModelFactory(val context: Context) : ViewModelProvider.Factory {
-    private val appPreferenceRepository =
-        AppDataStoreRepositoryImpl(AppPreferencesDataSource(context))
-    private val userPreferenceRepository = UserPreferenceRepositoryImpl(context)
-    private val authRepository = FirebaseAuthRepositoryImpl()
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(RegisterViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST") return RegisterViewModel(
-                appPreferenceRepository,
-                userPreferenceRepository,
-                authRepository
-            ) as T
-        }
-        throw IllegalArgumentException("Unknown viewModel class")
-    }
-}

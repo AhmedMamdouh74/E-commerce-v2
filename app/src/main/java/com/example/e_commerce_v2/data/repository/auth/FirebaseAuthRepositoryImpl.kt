@@ -1,5 +1,6 @@
 package com.example.e_commerce_v2.data.repository.auth
 
+import android.util.Log
 import com.example.e_commerce_v2.data.models.Resource
 import com.example.e_commerce_v2.data.models.user.AuthProvider
 import com.example.e_commerce_v2.data.models.user.UserDetailsModel
@@ -13,10 +14,11 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
 
-class FirebaseAuthRepositoryImpl(
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+class FirebaseAuthRepositoryImpl @Inject constructor(
+    private val auth: FirebaseAuth ,
+    private val firestore: FirebaseFirestore
 ) :
     FirebaseAuthRepository {
     private suspend fun login(
@@ -35,6 +37,8 @@ class FirebaseAuthRepositoryImpl(
                 emit(Resource.Error(Exception(msg)))
                 return@flow
             }
+            val idTokenRequest=authResult.user?.getIdToken(true)?.await()
+            Log.d(TAG, "login: ${idTokenRequest?.token.toString()}")
             if (authResult.user?.isEmailVerified == false) {
                 authResult.user?.sendEmailVerification()?.await()
                 val msg = "Email not verified, verification email sent"

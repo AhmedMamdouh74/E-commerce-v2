@@ -2,8 +2,9 @@ package com.example.e_commerce_v2.data.repository.common
 
 import com.example.e_commerce_v2.data.datasource.datastore.AppPreferencesDataSource
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class AppDataStoreRepositoryImpl(
+class AppDataStoreRepositoryImpl @Inject constructor(
     private val appPreferencesDataSource: AppPreferencesDataSource
 ) : AppPreferenceRepository {
 
