@@ -6,6 +6,7 @@ plugins {
     id("kotlin-kapt")
     id("kotlin-parcelize")
     id("com.google.protobuf") version "0.9.4" apply true
+    id("com.google.dagger.hilt.android")
 
 }
 
@@ -55,16 +56,17 @@ android {
 
         }
         compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_1_8
-            targetCompatibility = JavaVersion.VERSION_1_8
+            sourceCompatibility = JavaVersion.VERSION_17
+            targetCompatibility = JavaVersion.VERSION_17
         }
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "17"
         }
         buildFeatures {
             viewBinding = true
             dataBinding = true
         }
+
     }
 
     dependencies {
@@ -77,6 +79,7 @@ android {
         testImplementation(libs.junit)
         androidTestImplementation(libs.androidx.junit)
         androidTestImplementation(libs.androidx.espresso.core)
+
         // splash screen
         implementation("androidx.core:core-splashscreen:1.0.0")
         // firebase dependencies
@@ -89,6 +92,11 @@ android {
         implementation ("com.facebook.android:facebook-login:16.0.0")
         // third party libraries
         implementation("com.github.pwittchen:reactivenetwork-rx2:3.0.8")
+        // hilt
+        implementation("com.google.dagger:hilt-android:2.48")
+        implementation("androidx.hilt:hilt-navigation-fragment:1.2.0")
+        kapt("com.google.dagger:hilt-android-compiler:2.47")
+        kapt("androidx.hilt:hilt-compiler:1.2.0")
         // navigation component
         val nav_version = "2.7.7"
         implementation("androidx.navigation:navigation-fragment-ktx:$nav_version")
@@ -99,6 +107,8 @@ android {
         implementation("com.google.protobuf:protobuf-kotlin-lite:4.26.0")
         // data store
         implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+
     }
 }
 // Setup protobuf configuration, generating lite Java and Kotlin classes
