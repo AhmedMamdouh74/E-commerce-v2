@@ -1,20 +1,15 @@
 package com.example.e_commerce_v2.ui.auth.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.e_commerce_v2.data.datasource.datastore.AppPreferencesDataSource
 import com.example.e_commerce_v2.data.models.Resource
 import com.example.e_commerce_v2.data.models.user.UserDetailsModel
 import com.example.e_commerce_v2.data.repository.auth.FirebaseAuthRepository
-import com.example.e_commerce_v2.data.repository.auth.FirebaseAuthRepositoryImpl
-import com.example.e_commerce_v2.data.repository.common.AppDataStoreRepositoryImpl
 import com.example.e_commerce_v2.data.repository.common.AppPreferenceRepository
 import com.example.e_commerce_v2.data.repository.user.UserPreferenceRepository
-import com.example.e_commerce_v2.data.repository.user.UserPreferenceRepositoryImpl
 import com.example.e_commerce_v2.domain.models.toUserDetailsPreferences
 import com.example.e_commerce_v2.utils.isValidEmail
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -23,12 +18,11 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-
-class LoginViewModel(
+@HiltViewModel
+class LoginViewModel @Inject constructor(
     private val appPreferenceRepository: AppPreferenceRepository,
     private val userPreferenceRepository: UserPreferenceRepository,
     private val authRepository: FirebaseAuthRepository
@@ -88,23 +82,3 @@ class LoginViewModel(
     }
 }
 
-// create viewmodel factory class
-class LoginViewModelFactory(
-    private val contextValue: Context
-
-) : ViewModelProvider.Factory {
-    private val appPreferenceRepository =
-        AppDataStoreRepositoryImpl(AppPreferencesDataSource(contextValue))
-    private val userPreferenceRepository = UserPreferenceRepositoryImpl(contextValue)
-    private val authRepository = FirebaseAuthRepositoryImpl()
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST") return LoginViewModel(
-                appPreferenceRepository,
-                userPreferenceRepository,
-                authRepository
-            ) as T
-        }
-        throw IllegalArgumentException("Unknown ViewModel class")
-    }
-}

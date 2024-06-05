@@ -14,7 +14,6 @@ import com.example.e_commerce_v2.data.models.Resource
 import com.example.e_commerce_v2.databinding.FragmentRegisterBinding
 import com.example.e_commerce_v2.ui.auth.getGoogleRequestIntent
 import com.example.e_commerce_v2.ui.auth.viewmodel.RegisterViewModel
-import com.example.e_commerce_v2.ui.auth.viewmodel.RegisterViewModelFactory
 import com.example.e_commerce_v2.ui.common.fragments.BaseFragment
 import com.example.e_commerce_v2.ui.showSnakeBarError
 import com.example.e_commerce_v2.utils.CrashlyticsUtils
@@ -30,14 +29,15 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlin.math.log
 
+@AndroidEntryPoint
 class RegisterFragment : BaseFragment<FragmentRegisterBinding, RegisterViewModel>() {
 
 
-    override val viewModel: RegisterViewModel by viewModels {
-        RegisterViewModelFactory(requireContext())
-    }
+    override val viewModel: RegisterViewModel by viewModels ()
 
     override fun getLayoutId(): Int = R.layout.fragment_register
 
@@ -72,7 +72,8 @@ class RegisterFragment : BaseFragment<FragmentRegisterBinding, RegisterViewModel
                                 resource.exception?.message ?: getString(R.string.generic_err_msg)
                             progressDialog.dismiss()
                             view?.showSnakeBarError(msg)
-                            logAuthIssueToCrashlytics(msg, "Register Error")
+                            logAuthIssueToCrashlytics(msg, "RegisterRequestModel Error")
+                            Log.d(TAG, "initViewModel: $msg")
 
                         }
 
@@ -125,7 +126,7 @@ class RegisterFragment : BaseFragment<FragmentRegisterBinding, RegisterViewModel
     }
 
     private fun firebaseAuthWithGoogle(token: String) {
-        viewModel.registerWithGoogle(token)
+      //  viewModel.registerWithGoogle(token)
     }
 
     private fun signOut() {
@@ -175,13 +176,13 @@ class RegisterFragment : BaseFragment<FragmentRegisterBinding, RegisterViewModel
 
 
     private fun firebaseAuthWithFacebook(token: String) {
-        viewModel.registerWithFacebook(token)
+     //   viewModel.registerWithFacebook(token)
     }
 
 
     private fun showLoginSuccessfulDialog() {
         MaterialAlertDialogBuilder(requireActivity())
-            .setTitle("Register success")
+            .setTitle("RegisterRequestModel success")
             .setMessage("we have sent you an email verification link. please verify your email to login.")
             .setPositiveButton(
                 "OK"

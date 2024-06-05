@@ -7,9 +7,10 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import javax.inject.Inject
 
-class UserFirestoreRepositoryImpl(
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+class UserFirestoreRepositoryImpl @Inject constructor(
+    private val firestore: FirebaseFirestore
 ) : UserFirestoreRepository {
 
     override suspend fun getUserDetails(userId: String): Flow<Resource<UserDetailsModel>> =
