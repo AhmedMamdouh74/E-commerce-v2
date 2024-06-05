@@ -31,6 +31,8 @@ import com.google.android.gms.tasks.Task
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlin.math.log
+
 @AndroidEntryPoint
 class RegisterFragment : BaseFragment<FragmentRegisterBinding, RegisterViewModel>() {
 
@@ -70,7 +72,8 @@ class RegisterFragment : BaseFragment<FragmentRegisterBinding, RegisterViewModel
                                 resource.exception?.message ?: getString(R.string.generic_err_msg)
                             progressDialog.dismiss()
                             view?.showSnakeBarError(msg)
-                            logAuthIssueToCrashlytics(msg, "Register Error")
+                            logAuthIssueToCrashlytics(msg, "RegisterRequestModel Error")
+                            Log.d(TAG, "initViewModel: $msg")
 
                         }
 
@@ -123,7 +126,7 @@ class RegisterFragment : BaseFragment<FragmentRegisterBinding, RegisterViewModel
     }
 
     private fun firebaseAuthWithGoogle(token: String) {
-        viewModel.registerWithGoogle(token)
+      //  viewModel.registerWithGoogle(token)
     }
 
     private fun signOut() {
@@ -173,13 +176,13 @@ class RegisterFragment : BaseFragment<FragmentRegisterBinding, RegisterViewModel
 
 
     private fun firebaseAuthWithFacebook(token: String) {
-        viewModel.registerWithFacebook(token)
+     //   viewModel.registerWithFacebook(token)
     }
 
 
     private fun showLoginSuccessfulDialog() {
         MaterialAlertDialogBuilder(requireActivity())
-            .setTitle("Register success")
+            .setTitle("RegisterRequestModel success")
             .setMessage("we have sent you an email verification link. please verify your email to login.")
             .setPositiveButton(
                 "OK"

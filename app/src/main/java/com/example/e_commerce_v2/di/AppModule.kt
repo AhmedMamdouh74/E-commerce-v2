@@ -1,6 +1,7 @@
 package com.example.e_commerce_v2.di
 
 
+import android.app.Application
 import android.content.Context
 import com.example.e_commerce_v2.data.datasource.datastore.AppPreferencesDataSource
 import com.example.e_commerce_v2.data.models.user.UserDetailsModel
@@ -30,7 +31,7 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideAppPreferences( context: Context): AppPreferencesDataSource {
+    fun provideAppPreferences(context: Application): AppPreferencesDataSource {
         return AppPreferencesDataSource(context)
     }
     @Provides
@@ -40,7 +41,5 @@ object AppModule {
             id = "1236", email = "ahmed@mail.com"
         )
     }
-    @Provides
-    @Singleton
-    fun provideContext(@ApplicationContext context: Context): Context = context
+
 }

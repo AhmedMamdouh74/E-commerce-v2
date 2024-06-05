@@ -56,11 +56,11 @@ android {
 
         }
         compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_17
-            targetCompatibility = JavaVersion.VERSION_17
+            sourceCompatibility = JavaVersion.VERSION_1_8
+            targetCompatibility = JavaVersion.VERSION_1_8
         }
         kotlinOptions {
-            jvmTarget = "17"
+            jvmTarget = "1.8"
         }
         buildFeatures {
             viewBinding = true
@@ -107,6 +107,13 @@ android {
         implementation("com.google.protobuf:protobuf-kotlin-lite:4.26.0")
         // data store
         implementation("androidx.datastore:datastore-preferences:1.0.0")
+        // retrofit
+        implementation("com.squareup.retrofit2:retrofit:2.11.0")
+        implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+        //OKHttp
+        implementation("com.squareup.okhttp3:okhttp:4.11.0")
+        implementation("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.14")
+
 
 
     }
