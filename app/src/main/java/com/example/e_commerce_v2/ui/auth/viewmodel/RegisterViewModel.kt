@@ -1,20 +1,14 @@
 package com.example.e_commerce_v2.ui.auth.viewmodel
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.example.e_commerce_v2.data.datasource.datastore.AppPreferencesDataSource
 import com.example.e_commerce_v2.data.models.Resource
+import com.example.e_commerce_v2.data.models.auth.RegisterRequestModel
+import com.example.e_commerce_v2.data.models.auth.RegisterResponseModel
 import com.example.e_commerce_v2.data.models.user.UserDetailsModel
 import com.example.e_commerce_v2.data.repository.auth.FirebaseAuthRepository
-import com.example.e_commerce_v2.data.repository.auth.FirebaseAuthRepositoryImpl
-import com.example.e_commerce_v2.data.repository.common.AppDataStoreRepositoryImpl
-import com.example.e_commerce_v2.data.repository.common.AppPreferenceRepository
-import com.example.e_commerce_v2.data.repository.user.UserPreferenceRepository
-import com.example.e_commerce_v2.data.repository.user.UserPreferenceRepositoryImpl
-import com.example.e_commerce_v2.domain.models.toUserDetailsPreferences
 import com.example.e_commerce_v2.utils.isValidEmail
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,15 +17,14 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import java.lang.IllegalArgumentException
+import javax.inject.Inject
 
-class RegisterViewModel(
-    private val appPreferenceRepository: AppPreferenceRepository,
-    private val userPreferenceRepository: UserPreferenceRepository,
+@HiltViewModel
+class RegisterViewModel @Inject constructor(
     private val authRepository: FirebaseAuthRepository
 ) : ViewModel() {
-    private val _registerState = MutableSharedFlow<Resource<UserDetailsModel>?>()
-    val registerState: SharedFlow<Resource<UserDetailsModel>?> = _registerState.asSharedFlow()
+    private val _registerState = MutableSharedFlow<Resource<RegisterResponseModel>>()
+    val registerState: SharedFlow<Resource<RegisterResponseModel>> = _registerState.asSharedFlow()
 
     val name = MutableStateFlow("")
     val email = MutableStateFlow("")
@@ -47,92 +40,82 @@ class RegisterViewModel(
         val email = email.value
         val password = password.value
         if (isRegisterIsValid.first()) {
-            registerWithEmailAndPassword(name, email, password)
+            val registerRequestModel =
+                RegisterRequestModel(
+                    email = email,
+                    password = password,
+                    fullName = name
+                )
+            authRepository.registerEmailAndPasswordWithAPI(
+                registerRequestModel
+            ).collect {
+                _registerState.emit(it)
+            }
 
         } else {
-            _registerState.emit(Resource.Error(Exception("Invalid email or password")))
+
 
         }
 
 
     }
+
 
     private fun registerWithEmailAndPassword(name: String, email: String, password: String) =
         viewModelScope.launch(IO) {
-            val result = authRepository.registerWithEmailAndPassword(name, email, password)
-            result.collect { resource ->
-                resource
-                when (resource) {
+//            val result = authRepository.registerWithEmailAndPassword(name, email, password)
+//            result.collect { resource ->
+//                when (resource) {
+//
+//                    is Resource.Success -> {
+//                        _registerState.emit(Resource.Success(resource.data!!))
+//                    }
+//
+//                    else -> {
+//                        _registerState.emit(resource)
+//                    }
+//                }
 
-                    is Resource.Success -> {
-                        _registerState.emit(Resource.Success(resource.data!!))
-                    }
-
-                    else -> {
-                        _registerState.emit(resource)
-                    }
-                }
-
-            }
         }
 
-     fun registerWithFacebook(token: String) =
+
+    fun registerWithFacebook(token: String) =
         viewModelScope.launch(IO) {
-            val result = authRepository.registerWithFacebook(token)
-            result.collect { resource ->
-                resource
-                when (resource) {
+//            val result = authRepository.registerWithFacebook(token)
+//            result.collect { resource ->
+//                when (resource) {
+//
+//                    is Resource.Success -> {
+//                        _registerState.emit(Resource.Success(resource.data!!))
+//                    }
+//
+//                    else -> {
+//                        _registerState.emit(resource)
+//                    }
+//                }
 
-                    is Resource.Success -> {
-                        _registerState.emit(Resource.Success(resource.data!!))
-                    }
-
-                    else -> {
-                        _registerState.emit(resource)
-                    }
-                }
-
-            }
         }
+
+
     fun registerWithGoogle(token: String) =
         viewModelScope.launch(IO) {
-            val result = authRepository.registerWithGoogle(token)
-            result.collect { resource ->
-                resource
-                when (resource) {
-
-                    is Resource.Success -> {
-                        _registerState.emit(Resource.Success(resource.data!!))
-                    }
-
-                    else -> {
-                        _registerState.emit(resource)
-                    }
-                }
-
-            }
+//            val result = authRepository.registerWithGoogle(token)
+//            result.collect { resource ->
+//                when (resource) {
+//
+//                    is Resource.Success -> {
+//                        _registerState.emit(Resource.Success(resource.data!!))
+//                    }
+//
+//                    else -> {
+//                        _registerState.emit(resource)
+//                    }
+//                }
+//
+//            }
         }
 
-    private suspend fun savePreferenceData(userDetailsModel: UserDetailsModel) {
-        appPreferenceRepository.saveLoginState(true)
-        userPreferenceRepository.updateUserDetails(userDetailsModel.toUserDetailsPreferences())
-    }
+
 }
 
 
-class RegisterViewModelFactory(val context: Context) : ViewModelProvider.Factory {
-    private val appPreferenceRepository =
-        AppDataStoreRepositoryImpl(AppPreferencesDataSource(context))
-    private val userPreferenceRepository = UserPreferenceRepositoryImpl(context)
-    private val authRepository = FirebaseAuthRepositoryImpl()
-    override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(RegisterViewModel::class.java)) {
-            @Suppress("UNCHECKED_CAST") return RegisterViewModel(
-                appPreferenceRepository,
-                userPreferenceRepository,
-                authRepository
-            ) as T
-        }
-        throw IllegalArgumentException("Unknown viewModel class")
-    }
-}

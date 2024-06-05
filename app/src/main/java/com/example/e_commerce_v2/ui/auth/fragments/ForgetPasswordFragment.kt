@@ -6,25 +6,22 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import com.example.e_commerce_v2.data.models.Resource
 import com.example.e_commerce_v2.databinding.FragmentForgetPasswordBinding
 import com.example.e_commerce_v2.ui.auth.viewmodel.ForgetPasswordViewModel
-import com.example.e_commerce_v2.ui.auth.viewmodel.ForgetPasswordViewModelFactory
 import com.example.e_commerce_v2.ui.common.customviews.ProgressDialog
 import com.example.e_commerce_v2.ui.showSnakeBarError
 import com.example.e_commerce_v2.utils.CrashlyticsUtils
 import com.example.e_commerce_v2.utils.ForgetPasswordException
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
-
+@AndroidEntryPoint
 class ForgetPasswordFragment : BottomSheetDialogFragment() {
     private val progressDialog by lazy { ProgressDialog.createProgressDialog(requireActivity()) }
-    private val forgetPasswordViewModel: ForgetPasswordViewModel by viewModels {
-        ForgetPasswordViewModelFactory()
-    }
+    private val forgetPasswordViewModel: ForgetPasswordViewModel by viewModels ()
     private var _binding: FragmentForgetPasswordBinding? = null
     private val binding get() = _binding!!
     override fun onCreateView(

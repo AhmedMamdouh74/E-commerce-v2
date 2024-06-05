@@ -1,6 +1,11 @@
 package com.example.e_commerce_v2.data.repository.auth
 
+import android.util.Log
+import com.example.e_commerce_v2.data.datasource.networking.CloudFunctionAPI
+import com.example.e_commerce_v2.data.datasource.networking.handleErrorResponse
 import com.example.e_commerce_v2.data.models.Resource
+import com.example.e_commerce_v2.data.models.auth.RegisterRequestModel
+import com.example.e_commerce_v2.data.models.auth.RegisterResponseModel
 import com.example.e_commerce_v2.data.models.user.AuthProvider
 import com.example.e_commerce_v2.data.models.user.UserDetailsModel
 import com.example.e_commerce_v2.utils.CrashlyticsUtils
@@ -13,10 +18,13 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import java.util.Date
+import javax.inject.Inject
 
-class FirebaseAuthRepositoryImpl(
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance(),
-    private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
+class FirebaseAuthRepositoryImpl @Inject constructor(
+    private val auth: FirebaseAuth,
+    private val firestore: FirebaseFirestore,
+    private val cloudFunctionAPI: CloudFunctionAPI
 ) :
     FirebaseAuthRepository {
     private suspend fun login(
@@ -35,6 +43,8 @@ class FirebaseAuthRepositoryImpl(
                 emit(Resource.Error(Exception(msg)))
                 return@flow
             }
+            val idTokenRequest = authResult.user?.getIdToken(true)?.await()
+            Log.d(TAG, "login: ${idTokenRequest?.token.toString()}")
             if (authResult.user?.isEmailVerified == false) {
                 authResult.user?.sendEmailVerification()?.await()
                 val msg = "Email not verified, verification email sent"
@@ -105,7 +115,6 @@ class FirebaseAuthRepositoryImpl(
                 return@flow
             }
             val userDetails = UserDetailsModel(
-                createdAt = System.currentTimeMillis(),
                 id = userId,
                 email = email,
                 name = name
@@ -166,7 +175,6 @@ class FirebaseAuthRepositoryImpl(
                 }
 
                 val userDetails = UserDetailsModel(
-                    createdAt = System.currentTimeMillis(),
                     id = userId,
                     email = authResult.user?.email,
                     name = authResult.user?.displayName
@@ -197,6 +205,32 @@ class FirebaseAuthRepositoryImpl(
             }
         }
 
+    override suspend fun registerEmailAndPasswordWithAPI(registerRequestModel: RegisterRequestModel): Flow<Resource<RegisterResponseModel>> {
+        return flow {
+            try {
+                emit(Resource.Loading())
+                val response = cloudFunctionAPI.registerUser(registerRequestModel)
+                if (response.isSuccessful) {
+                    val registerResponse = response.body()
+                    registerResponse?.data?.let {
+                        emit(Resource.Success(it))
+                    } ?: run {
+                        emit(Resource.Error(Exception(registerResponse?.message)))
+                    }
+                } else {
+                    Log.d(
+                        TAG,
+                        "registerEmailAndPasswordWithAPI: Error registering user = ${response.errorBody()}"
+                    )
+                    emit(Resource.Error(Exception(handleErrorResponse(response.errorBody()!!.charStream()))))
+                }
+            } catch (e: Exception) {
+                emit(Resource.Error(e))
+            }
+        }
+
+    }
+
     override suspend fun registerWithFacebook(token: String): Flow<Resource<UserDetailsModel>> =
         flow {
             try {
@@ -213,7 +247,6 @@ class FirebaseAuthRepositoryImpl(
                     return@flow
                 }
                 val userDetails = UserDetailsModel(
-                    createdAt = System.currentTimeMillis(),
                     id = userId,
                     email = authResult.user?.email,
                     name = authResult.user?.displayName
