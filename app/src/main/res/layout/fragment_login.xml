@@ -5,7 +5,7 @@
     <data>
 
         <variable
-            name="viewmodel"
+            name="viewModel"
             type="com.example.e_commerce_v2.ui.auth.viewmodel.LoginViewModel" />
     </data>
 
@@ -52,7 +52,7 @@
                 android:drawableStart="@drawable/ic_email"
                 android:hint="@string/email_et_hint"
                 android:inputType="textEmailAddress"
-                android:text="@={viewmodel.email}" />
+                android:text="@={viewModel.email}" />
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/password_et"
@@ -63,13 +63,13 @@
                 android:drawableStart="@drawable/ic_password"
                 android:hint="@string/password_et_hint"
                 android:inputType="textPassword"
-                android:text="@={viewmodel.password}" />
+                android:text="@={viewModel.password}" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/login_btn"
                 style="@style/PrimaryButtonStyle"
                 android:layout_marginTop="16dp"
-                android:onClickListener="@{()->viewmodel.login()}"
+                android:onClickListener="@{()->viewModel.login()}"
                 android:text="@string/sign_in" />
 
             <RelativeLayout
