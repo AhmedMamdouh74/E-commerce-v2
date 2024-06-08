@@ -27,5 +27,10 @@
     <string name="have_an_account_msg">have an account?</string>
     <string name="send">send</string>
     <string name="forget_password_msg">Enter your email, to send an email to update your password.</string>
+    <string name="home">Home</string>
+    <string name="explore">Explore</string>
+    <string name="cart">Cart</string>
+    <string name="offer">Offer</string>
+    <string name="account">Account</string>
 
 </resources>

@@ -32,10 +32,6 @@ class MainActivity : AppCompatActivity() {
         }
 
         setContentView(R.layout.activity_main)
-        findViewById<View>(R.id.textView).setOnClickListener {
-            logOut()
-        }
-
         initViewModel()
     }
 

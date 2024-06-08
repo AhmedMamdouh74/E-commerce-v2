@@ -108,6 +108,7 @@ class LoginFragment : BaseFragment<FragmentLoginBinding, LoginViewModel>() {
             val forgetPasswordFragment = ForgetPasswordFragment()
             forgetPasswordFragment.show(parentFragmentManager, "forget-password")
         }
+
     }
 
 

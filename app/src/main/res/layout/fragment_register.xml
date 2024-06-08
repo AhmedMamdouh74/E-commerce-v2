@@ -3,7 +3,7 @@
 
     <data>
 <variable
-    name="viewModel"
+    name="viewmodel"
     type="com.example.e_commerce_v2.ui.auth.viewmodel.RegisterViewModel" />
     </data>
 
@@ -50,7 +50,7 @@
                 android:drawableStart="@drawable/ic_email"
                 android:hint="@string/name_et_hint"
                 android:inputType="textPersonName"
-                android:text="@={viewModel.name}" />
+                android:text="@={viewmodel.name}" />
 
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/email_et"
@@ -61,7 +61,7 @@
                 android:drawableStart="@drawable/ic_email"
                 android:hint="@string/email_et_hint"
                 android:inputType="textEmailAddress"
-                android:text="@={viewModel.email}" />
+                android:text="@={viewmodel.email}" />
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/password_et"
                 style="@style/EditTextStyle"
@@ -71,7 +71,7 @@
                 android:drawableStart="@drawable/ic_password"
                 android:hint="@string/password_et_hint"
                 android:inputType="textPassword"
-                android:text="@={viewModel.password}" />
+                android:text="@={viewmodel.password}" />
             <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/confirm_Password_et"
                 style="@style/EditTextStyle"
@@ -81,13 +81,13 @@
                 android:drawableStart="@drawable/ic_password"
                 android:hint="@string/confirm_password_et_hint"
                 android:inputType="textPassword"
-                android:text="@={viewModel.confirmPassword}" />
+                android:text="@={viewmodel.confirmPassword}" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/register_btn"
                 style="@style/PrimaryButtonStyle"
                 android:layout_marginTop="16dp"
-                android:onClickListener="@{()->viewModel.register()}"
+                android:onClickListener="@{()->viewmodel.register()}"
                 android:text="@string/sign_up" />
 
             <RelativeLayout

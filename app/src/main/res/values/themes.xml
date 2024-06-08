@@ -82,4 +82,26 @@
         <item name="android:textColor">@color/primary_color</item>
         <item name="android:textSize">14sp</item>
     </style>
+    <style name="Widget.App.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+        <item name="backgroundTint">@color/white</item>
+        <item name="itemActiveIndicatorStyle">@null</item>
+        <item name="itemTextAppearanceActive">@style/SelectedBottomNavigationViewTextStyle</item>
+        <item name="itemTextAppearanceInactive">@style/SelectedBottomNavigationViewTextStyle</item>
+    </style>
+
+    <style name="SelectedBottomNavigationViewTextStyle" parent="@style/TextAppearance.AppCompat.Caption">
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="SaleTimerItemTextStyle">
+        <item name="android:layout_height">45dp</item>
+        <item name="android:layout_width">45dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textSize">18sp</item>
+        <item name="android:textColor">@color/primary_dark_color</item>
+        <item name="android:fontFamily">@font/poppins_bold</item>
+        <item name="android:padding">8dp</item>
+        <item name="fontFamily">@font/poppins_bold</item>
+        <item name="android:background">@drawable/timer_background</item>
+    </style>
 </resources>

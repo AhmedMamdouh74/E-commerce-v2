@@ -1,6 +1,7 @@
 package com.example.e_commerce_v2.ui.common.fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,18 +38,23 @@ abstract class BaseFragment<DB : ViewDataBinding, VM : ViewModel> : Fragment() {
 
 
     private fun doDataBinding() {
+        // it is extra if you want to set life cycle owner in binding
         binding.lifecycleOwner = viewLifecycleOwner
+        // Here your viewModel and binding variable implementation
         binding.setVariable(
-            BR.viewModel,
-            viewModel
-        )
+            BR.viewmodel, viewModel
+        )  // In all layout the variable name should be "viewModel"
         binding.executePendingBindings()
     }
 
     abstract fun init()
     override fun onDestroy() {
+        Log.d(TAG, "onDestroyView: ${binding.javaClass.name}")
         super.onDestroy()
         _binding = null
+    }
+    companion object{
+        const val TAG="BaseFragment"
     }
 
 
