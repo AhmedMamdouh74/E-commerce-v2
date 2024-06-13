@@ -1,60 +1,112 @@
 package com.example.e_commerce_v2.ui.home.fragments
 
-import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
+
 import android.view.View
-import android.view.ViewGroup
+import android.widget.LinearLayout
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
 import com.example.e_commerce_v2.R
+import com.example.e_commerce_v2.databinding.FragmentHomeBinding
+import com.example.e_commerce_v2.ui.common.customviews.CircleView
+import com.example.e_commerce_v2.ui.common.fragments.BaseFragment
+import com.example.e_commerce_v2.ui.home.adapter.SalesAdAdapter
+import com.example.e_commerce_v2.ui.home.model.SalesAdUIModel
+import com.example.e_commerce_v2.ui.home.viewmodel.HomeViewModel
+import dagger.hilt.android.AndroidEntryPoint
+import java.util.Date
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
+@AndroidEntryPoint
+class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
 
-/**
- * A simple [Fragment] subclass.
- * Use the [HomeFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
-class HomeFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
+    override val viewModel: HomeViewModel by viewModels()
+
+
+    override fun getLayoutId() = R.layout.fragment_home
+
+
+    override fun init() {
+        initViews()
+        initViewModel()
+    }
+
+    private fun initViewModel() {
+
+    }
+
+    private fun initViews() {
+        initSalesAdsView()
+
+    }
+
+    private fun initSalesAdsView() {
+
+        val salesAds = listOf(
+            SalesAdUIModel(
+                title = "Super Flash Sale",
+                imageUrl = "https://firebasestorage.googleapis.com/v0/b/e-commerce-8494e.appspot.com/o/temps%2FPromotion%20Image.png?alt=media&token=0e2c72ff-d39a-4bb0-b9da-4991a39c782e",
+                endAt = Date(System.currentTimeMillis())
+            ),
+            SalesAdUIModel(
+                title = " Limited offer",
+                imageUrl = "https://firebasestorage.googleapis.com/v0/b/e-commerce-8494e.appspot.com/o/temps%2Fbig-sale-megaphone-banner-isolated-on-white-background-vector-sale-banner-discount-offer-market-advertising-illustration-2BNBMX2.jpg?alt=media&token=686207af-500e-48e6-bfad-ce752dcbb826",
+                endAt = Date(System.currentTimeMillis())
+            )
+        )
+        initializeIndicators(salesAds.size)
+        val salesAdapter = SalesAdAdapter(lifecycleScope, salesAds)
+        binding.saleAdsViewPager.apply {
+            adapter = salesAdapter
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    super.onPageSelected(position)
+                    updateIndicators(position)
+                }
+            })
+        }
+        binding.saleAdsShimmerView.root.stopShimmer()
+        binding.saleAdsShimmerView.root.visibility = View.GONE
+
+    }
+
+
+    private var indicators = mutableListOf<CircleView>()
+
+    private fun initializeIndicators(count: Int) {
+        for (i in 0 until count) {
+            val circleView = CircleView(requireContext())
+            val params = LinearLayout.LayoutParams(
+                20, 20
+            )
+            params.setMargins(8, 0, 8, 0) // Margin between circles
+            circleView.setLayoutParams(params)
+            circleView.setRadius(10f) // Set radius
+            circleView.setColor(
+                if (i == 0) requireContext().getColor(R.color.primary_color) else requireContext().getColor(
+                    R.color.neutral_grey
+                )
+            ) // First indicator is red
+            circleView.setOnClickListener {
+                binding.saleAdsViewPager.setCurrentItem(i, true)
+            }
+            indicators.add(circleView)
+            binding.indicatorView.addView(circleView)
+        }
+
+    }
+
+    private fun updateIndicators(position: Int) {
+        for (i in 0 until indicators.size) {
+            indicators[i].setColor(
+                if (i == position) requireContext().getColor(R.color.primary_color) else requireContext().getColor(
+                    R.color.neutral_grey
+                )
+            )
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_home, container, false)
-    }
-
     companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment HomeFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            HomeFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
-            }
+        const val TAG = "HomeFragment"
     }
 }
