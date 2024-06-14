@@ -18,7 +18,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
-import java.util.Date
 import javax.inject.Inject
 
 class FirebaseAuthRepositoryImpl @Inject constructor(
@@ -157,14 +156,14 @@ class FirebaseAuthRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun registerWithGoogle(idToken: String): Flow<Resource<UserDetailsModel>> =
+    override suspend fun registerWithGoogle(token: String): Flow<Resource<UserDetailsModel>> =
         flow {
             try {
                 emit(Resource.Loading())
                 // Perform Firebase Auth sign in
 
                 val authResult =
-                    auth.signInWithCredential(GoogleAuthProvider.getCredential(idToken, null))
+                    auth.signInWithCredential(GoogleAuthProvider.getCredential(token, null))
                         .await()
                 val msg = "Sign up UserID not found"
                 val userId = authResult.user?.uid

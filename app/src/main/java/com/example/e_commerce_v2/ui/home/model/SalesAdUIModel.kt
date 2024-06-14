@@ -10,7 +10,8 @@ data class SalesAdUIModel(
     val title: String? = null,
     val description: String? = null,
 
-    var imageUrl: String? = null, val type: String? = null,
+    var imageUrl: String? = null,
+    val type: String? = null,
 
     var productId: String? = null,
 

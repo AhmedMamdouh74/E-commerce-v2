@@ -1,12 +1,14 @@
 package com.example.e_commerce_v2.ui.home.fragments
 
 
+import android.util.Log
 import android.view.View
 import android.widget.LinearLayout
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.viewpager2.widget.ViewPager2
 import com.example.e_commerce_v2.R
+import com.example.e_commerce_v2.data.models.Resource
 import com.example.e_commerce_v2.databinding.FragmentHomeBinding
 import com.example.e_commerce_v2.ui.common.customviews.CircleView
 import com.example.e_commerce_v2.ui.common.fragments.BaseFragment
@@ -14,7 +16,7 @@ import com.example.e_commerce_v2.ui.home.adapter.SalesAdAdapter
 import com.example.e_commerce_v2.ui.home.model.SalesAdUIModel
 import com.example.e_commerce_v2.ui.home.viewmodel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import java.util.Date
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
@@ -32,28 +34,42 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
     }
 
     private fun initViewModel() {
+        lifecycleScope.launch {
+            viewModel.salesAdsState.collect { state ->
+                state.let { resource ->
+                    when (resource) {
+                        is Resource.Error -> {
+                            Log.d(TAG, "iniViewModel: Error")
+                        }
 
+                        is Resource.Loading -> {
+                            Log.d(TAG, "iniViewModel: Loading")
+                        }
+
+                        is Resource.Success -> {
+                            binding.saleAdsShimmerView.root.stopShimmer()
+                            binding.saleAdsShimmerView.root.visibility = View.GONE
+                            initSalesAdsView(resource.data)
+
+
+                        }
+                    }
+                }
+
+            }
+        }
     }
 
     private fun initViews() {
-        initSalesAdsView()
+
 
     }
 
-    private fun initSalesAdsView() {
+    private fun initSalesAdsView(salesAds: List<SalesAdUIModel>?) {
+        if (salesAds.isNullOrEmpty()) {
+            return
+        }
 
-        val salesAds = listOf(
-            SalesAdUIModel(
-                title = "Super Flash Sale",
-                imageUrl = "https://firebasestorage.googleapis.com/v0/b/e-commerce-8494e.appspot.com/o/temps%2FPromotion%20Image.png?alt=media&token=0e2c72ff-d39a-4bb0-b9da-4991a39c782e",
-                endAt = Date(System.currentTimeMillis())
-            ),
-            SalesAdUIModel(
-                title = " Limited offer",
-                imageUrl = "https://firebasestorage.googleapis.com/v0/b/e-commerce-8494e.appspot.com/o/temps%2Fbig-sale-megaphone-banner-isolated-on-white-background-vector-sale-banner-discount-offer-market-advertising-illustration-2BNBMX2.jpg?alt=media&token=686207af-500e-48e6-bfad-ce752dcbb826",
-                endAt = Date(System.currentTimeMillis())
-            )
-        )
         initializeIndicators(salesAds.size)
         val salesAdapter = SalesAdAdapter(lifecycleScope, salesAds)
         binding.saleAdsViewPager.apply {
@@ -65,8 +81,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
                 }
             })
         }
-        binding.saleAdsShimmerView.root.stopShimmer()
-        binding.saleAdsShimmerView.root.visibility = View.GONE
+
 
     }
 
