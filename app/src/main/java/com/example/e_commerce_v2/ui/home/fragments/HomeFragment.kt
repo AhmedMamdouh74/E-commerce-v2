@@ -16,7 +16,11 @@ import com.example.e_commerce_v2.ui.home.adapter.SalesAdAdapter
 import com.example.e_commerce_v2.ui.home.model.SalesAdUIModel
 import com.example.e_commerce_v2.ui.home.viewmodel.HomeViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
@@ -82,7 +86,24 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>() {
             })
         }
 
+        lifecycleScope.launch(Dispatchers.IO) {
+            tickerFlow(5000).collect {
+                withContext(Dispatchers.Main) {
+                    binding.saleAdsViewPager.setCurrentItem(
+                        (binding.saleAdsViewPager.currentItem + 1) % salesAds.size, true
+                    )
+                }
+            }
+        }
 
+
+    }
+
+    private fun tickerFlow(period: Long) = flow {
+        while (true) {
+            emit(Unit)
+            delay(period)
+        }
     }
 
 

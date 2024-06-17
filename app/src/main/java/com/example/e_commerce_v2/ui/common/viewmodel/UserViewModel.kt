@@ -1,21 +1,13 @@
 package com.example.e_commerce_v2.ui.common.viewmodel
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
-import com.example.e_commerce_v2.data.datasource.datastore.AppPreferencesDataSource
 import com.example.e_commerce_v2.data.models.Resource
 import com.example.e_commerce_v2.data.repository.auth.FirebaseAuthRepository
-import com.example.e_commerce_v2.data.repository.auth.FirebaseAuthRepositoryImpl
-import com.example.e_commerce_v2.data.repository.common.AppDataStoreRepositoryImpl
 import com.example.e_commerce_v2.data.repository.common.AppPreferenceRepository
 import com.example.e_commerce_v2.data.repository.user.UserFirestoreRepository
-import com.example.e_commerce_v2.data.repository.user.UserFirestoreRepositoryImpl
 import com.example.e_commerce_v2.data.repository.user.UserPreferenceRepository
-import com.example.e_commerce_v2.data.repository.user.UserPreferenceRepositoryImpl
 import com.example.e_commerce_v2.domain.models.toUserDetailsModel
 import com.example.e_commerce_v2.domain.models.toUserDetailsPreferences
 import com.example.e_commerce_v2.utils.CrashlyticsUtils

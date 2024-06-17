@@ -3,8 +3,6 @@ package com.example.e_commerce_v2.ui.auth.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.e_commerce_v2.data.models.Resource
-import com.example.e_commerce_v2.data.models.auth.RegisterRequestModel
-import com.example.e_commerce_v2.data.models.auth.RegisterResponseModel
 import com.example.e_commerce_v2.data.models.user.UserDetailsModel
 import com.example.e_commerce_v2.data.repository.auth.FirebaseAuthRepository
 import com.example.e_commerce_v2.utils.isValidEmail
@@ -23,8 +21,8 @@ import javax.inject.Inject
 class RegisterViewModel @Inject constructor(
     private val authRepository: FirebaseAuthRepository
 ) : ViewModel() {
-    private val _registerState = MutableSharedFlow<Resource<RegisterResponseModel>>()
-    val registerState: SharedFlow<Resource<RegisterResponseModel>> = _registerState.asSharedFlow()
+    private val _registerState = MutableSharedFlow<Resource<UserDetailsModel>>()
+    val registerState: SharedFlow<Resource<UserDetailsModel>> = _registerState.asSharedFlow()
 
     val name = MutableStateFlow("")
     val email = MutableStateFlow("")
@@ -40,20 +38,10 @@ class RegisterViewModel @Inject constructor(
         val email = email.value
         val password = password.value
         if (isRegisterIsValid.first()) {
-            val registerRequestModel =
-                RegisterRequestModel(
-                    email = email,
-                    password = password,
-                    fullName = name
-                )
-            authRepository.registerEmailAndPasswordWithAPI(
-                registerRequestModel
-            ).collect {
-                _registerState.emit(it)
-            }
+            registerWithEmailAndPassword(name, email, password)
 
         } else {
-
+            _registerState.emit(Resource.Error(Exception("Invalid email or password")))
 
         }
 
@@ -63,56 +51,58 @@ class RegisterViewModel @Inject constructor(
 
     private fun registerWithEmailAndPassword(name: String, email: String, password: String) =
         viewModelScope.launch(IO) {
-//            val result = authRepository.registerWithEmailAndPassword(name, email, password)
-//            result.collect { resource ->
-//                when (resource) {
-//
-//                    is Resource.Success -> {
-//                        _registerState.emit(Resource.Success(resource.data!!))
-//                    }
-//
-//                    else -> {
-//                        _registerState.emit(resource)
-//                    }
-//                }
+            val result = authRepository.registerWithEmailAndPassword(name, email, password)
+            result.collect { resource ->
+                when (resource) {
 
+                    is Resource.Success -> {
+                        _registerState.emit(Resource.Success(resource.data!!))
+                    }
+
+                    else -> {
+                        _registerState.emit(resource)
+                    }
+                }
+
+            }
         }
 
 
     fun registerWithFacebook(token: String) =
         viewModelScope.launch(IO) {
-//            val result = authRepository.registerWithFacebook(token)
-//            result.collect { resource ->
-//                when (resource) {
-//
-//                    is Resource.Success -> {
-//                        _registerState.emit(Resource.Success(resource.data!!))
-//                    }
-//
-//                    else -> {
-//                        _registerState.emit(resource)
-//                    }
-//                }
+            val result = authRepository.registerWithFacebook(token)
+            result.collect { resource ->
+                when (resource) {
 
+                    is Resource.Success -> {
+                        _registerState.emit(Resource.Success(resource.data!!))
+                    }
+
+                    else -> {
+                        _registerState.emit(resource)
+                    }
+                }
+
+            }
         }
 
 
     fun registerWithGoogle(token: String) =
         viewModelScope.launch(IO) {
-//            val result = authRepository.registerWithGoogle(token)
-//            result.collect { resource ->
-//                when (resource) {
-//
-//                    is Resource.Success -> {
-//                        _registerState.emit(Resource.Success(resource.data!!))
-//                    }
-//
-//                    else -> {
-//                        _registerState.emit(resource)
-//                    }
-//                }
-//
-//            }
+            val result = authRepository.registerWithGoogle(token)
+            result.collect { resource ->
+                when (resource) {
+
+                    is Resource.Success -> {
+                        _registerState.emit(Resource.Success(resource.data!!))
+                    }
+
+                    else -> {
+                        _registerState.emit(resource)
+                    }
+                }
+
+            }
         }
 
 

@@ -126,7 +126,7 @@ class RegisterFragment : BaseFragment<FragmentRegisterBinding, RegisterViewModel
     }
 
     private fun firebaseAuthWithGoogle(token: String) {
-      //  viewModel.registerWithGoogle(token)
+        viewModel.registerWithGoogle(token)
     }
 
     private fun signOut() {
@@ -176,7 +176,7 @@ class RegisterFragment : BaseFragment<FragmentRegisterBinding, RegisterViewModel
 
 
     private fun firebaseAuthWithFacebook(token: String) {
-     //   viewModel.registerWithFacebook(token)
+        viewModel.registerWithFacebook(token)
     }
 
 
